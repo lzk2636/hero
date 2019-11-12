@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/index.css" />
+</head>
+
+<body>
+    <img src="./img/header.png" alt="" class="header" />
+    <div class="cq-wrap">
+        <!-- 导航 -->
+        <div class="nav">
+            <ul>
+                <li><img src="./img/sword.png" alt="" /><span>剑士</span></li>
+                <li><img src="./img/knight.png" alt="" /> <span>骑士</span></li>
+                <li><img src="./img/Archer.png" alt="" /> <span>弓手</span></li>
+                <li><img src="./img/hunter.png" alt="" /> <span>猎人</span></li>
+                <li><img src="./img/magic.png" alt="" /> <span>法师</span></li>
+                <li><img src="./img/flamen.png" alt="" /> <span>祭司</span></li>
+            </ul>
+        </div>
+        <!-- table -->
+        <table class="cq-list">
+            <thead>
+                <th>勇士</th>
+                <th>技能</th>
+                <th>武器</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <img class="icon" src="http://p6.qhimg.com/dr/72__/t01b8063ea608652431.png" alt="" />
+                        <span>
+                            涅斯军长官尤莉娅
+                        </span>
+                    </td>
+                    <td>
+                        <img class="skill" src="http://p9.qhimg.com/dr/52__/t01087d8e61575ab25d.png" alt="" />
+                        注射!
+                    </td>
+                    <td>
+                        <img class="weapon" src="http://p6.qhimg.com/dr/45__/t0178ac936dcb72650f.png" alt="" />
+                        疫苗-G
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- 遮罩层 -->
+    <div class="cover" style="display: none">
+        <img class="loading" src="./img/loading01.gif" alt="" />
+    </div>
+</body>
+
+</html>
+<script src="./js/jquery-1.12.4.min.js"></script>
+<!-- 模板引擎 -->
+<script src="./js/template-web.js"></script>
+<!-- 模板 -->
+
+<script id='tempHero' type='text/html'>
+    {{each data.heros v}}
+    <tr>
+        <td>
+            <img class="icon" src="{{v.heroIcon}}" alt="">
+            <span>
+                {{v.heroName}}
+            </span>
+        </td>
+        <td>
+            <img class="skill" src="{{v.skillIcon}}" alt="">
+            {{v.skillName}}
+        </td>
+        <td>
+            <img class="weapon" src="{{v.weaponIcon}}" alt="">
+         {{v.weaponName}}
+        </td>
+    </tr>
+    {{/each}}
+
+</script>
+<script>
+    $(function () {
+        //页面onload时候加载
+        getImage();
+
+        //页面三十分钟后切换
+        setInterval(getImage, 1000 * 60 * 30);
+
+        $('.nav>ul>li').on('click', function () {
+            $(this).addClass('active').siblings().removeClass('active');
+
+            var requestText = $(this).children('span').text().trim();
+            console.log(requestText)
+            $.ajax({
+                type: 'get',
+                url: 'https://autumnfish.cn/api/cq/category',
+                data: {
+                    type: requestText
+                },
+                success: function (res) {
+                    // console.log(res)
+                    var tempHero = template('tempHero', res);
+                    $('.cq-list tbody').html(tempHero);
+                }
+            })
+        })
+
+        //页面onload第一个标签触发
+        $('.nav>ul>li').first().trigger('click');
+
+
+        $('.cq-list tbody').on('click', 'img.icon', function () {
+            // console.log(this)
+            $('.cover').show();
+            var heroName = $(this).next().text().trim();
+            $.ajax({
+                type: 'get',
+                url: 'https://autumnfish.cn/api/cq/gif',
+                data: {
+                    name: heroName
+                },
+                success: function (res) {
+                    // console.log(res)
+                    $('.loading').attr('src', res.data.skillGif);
+                }
+            })
+
+        })
+        $('.cover').on('click', function () {
+            $('.cover').hide();
+            $('.loading').attr('src','./img/loading01.gif');
+        })
+
+
+
+
+
+
+
+    })
+    function getImage() {
+
+        $.ajax({
+            type: 'get',
+            url: 'https://autumnfish.cn/api/cover/random',
+            data: {
+            },
+            success: function (res) {
+                $('body').css('backgroundImage', 'url("' + res.url + '")')
+            }
+        })
+
+    }
+
+
+
+</script>
